@@ -1,12 +1,12 @@
 {
   "name": "NUMERA · Das Zahlenlabor",
   "short_name": "NUMERA",
-  "description": "Experimentelle Gematria und Lotto-Datenanalyse ohne Gewinnversprechen.",
+  "description": "Gematria für Lotto 6aus49 und Eurojackpot ohne Gewinnversprechen.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0b111c",
-  "theme_color": "#101827",
+  "background_color": "#090b20",
+  "theme_color": "#11112c",
   "icons": [
     {"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
     {"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
