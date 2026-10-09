@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<meta name="description" content="NUMERA untersucht Gematria und historische Lottozahlen mit überprüfbaren Rückwärtstests. Keine Gewinnversprechen.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png" type="image/png">
+<link rel="stylesheet" href="./styles.css">
+<title>NUMERA | Das Zahlenlabor</title>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" aria-label="Hauptnavigation">
+    <a href="#generator" class="brand" data-tab-link="generator" aria-label="NUMERA Start">
+      <span class="brand-mark"><span class="brand-star">✳</span></span>
+      <span><span class="brand-name">NUMERA</span><small>Das Zahlenlabor</small></span>
+    </a>
+    <div class="sidebar-label">FORSCHUNG</div>
+    <nav class="side-nav">
+      <button type="button" class="nav-link active" data-tab="generator"><span class="nav-icon">◈</span><span>Generator</span></button>
+      <button type="button" class="nav-link" data-tab="patterns"><span class="nav-icon">▤</span><span>Musteranalyse</span></button>
+      <button type="button" class="nav-link" data-tab="backtest"><span class="nav-icon">◷</span><span>Rückwärtstest</span></button>
+      <button type="button" class="nav-link" data-tab="data"><span class="nav-icon">⤓</span><span>Datenarchiv</span></button>
+      <button type="button" class="nav-link" data-tab="method"><span class="nav-icon">◎</span><span>Methodik</span></button>
+    </nav>
+    <div class="sidebar-bottom">
+      <span class="status-pulse"></span><span id="sidebar-data-count">Daten werden geladen</span>
+      <div class="sidebar-version">NUMERA · Version 1.0.0</div>
+    </div>
+  </aside>
+  <div class="work-area">
+    <header class="topbar"><div><span class="eyebrow">ZAHLEN. MUSTER. FAKTEN.</span></div><div class="top-status"><span id="top-status-led" class="status-pulse"></span><span id="top-status">Archiv wird geladen …</span></div></header>
+    <main>
+      <section data-panel="generator" class="panel active" aria-label="Generator">
+        <div class="hero">
+          <div class="hero-copy"><div class="hero-tag"><span class="mini-dot"></span> EXPERIMENTELLE ZAHLENFORSCHUNG</div>
+            <h1>Was sagen uns<br><em>die Zahlen?</em></h1>
+            <p>Untersuche Verbindungen zwischen Gematria, Kalenderdaten und vergangenen Ziehungen. Jede Berechnung ist nachvollziehbar.</p>
+            <div class="hero-buttons"><button class="primary-btn" type="button" id="hero-generate">Zahlen berechnen <span aria-hidden="true">↗</span></button><button class="ghost-btn" type="button" id="hero-backtest">Zum Rückwärtstest <span aria-hidden="true">↗</span></button></div>
+          </div>
+          <div class="orb-panel" aria-hidden="true"><div class="orb-halo"></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orb-core">49<span>ZAHLEN</span></div><div class="orb-pip pip-one">7</div><div class="orb-pip pip-two">23</div><div class="orb-pip pip-three">11</div><div class="orb-pip pip-four">42</div></div>
+        </div>
+        <div class="section-heading"><div><span class="eyebrow">01 / ANALYSEKONFIGURATION</span><h2>Dein Zahlensystem</h2></div><span class="helper-tag">6 aus 49 · Deutschland</span></div>
+        <div class="control-grid">
+          <div class="panel-card control-card">
+            <label class="field-label" for="draw-date">Ziehungsdatum</label><input type="date" id="draw-date" required>
+            <label class="field-label" for="keyword">Wort für die Gematria</label><input type="text" id="keyword" maxlength="40" value="LOTTO" placeholder="Zum Beispiel LOTTO">
+            <p class="hint">Das Wort wird nach dem gewählten Zahlenalphabet umgerechnet.</p>
+          </div>
+          <div class="panel-card control-card">
+            <label class="field-label" for="alphabet">Gematria-System</label><select id="alphabet"><option value="ordinal">A = 1 bis Z = 26</option><option value="pythagorean">Pythagoreisch (1 bis 9)</option><option value="reverse">Umgekehrt (Z = 1)</option></select>
+            <label class="field-label" for="mode">Berechnungsmodell</label><select id="mode"><option value="gematria">Gematria &amp; Kalender</option><option value="hybrid">Gematria + historische Häufigkeit</option><option value="statistics">Nur historische Häufigkeit</option><option value="random">Zufall als Vergleich</option></select>
+          </div>
+          <div class="panel-card control-card">
+            <label class="field-label" for="ticket-count">Anzahl Zahlenreihen</label>
+            <select id="ticket-count"><option value="1">1 Zahlenreihe</option><option value="3">3 Zahlenreihen</option><option value="5">5 Zahlenreihen</option><option value="10">10 Zahlenreihen</option></select>
+            <div class="cost-line"><div><span>Reiner Spieleinsatz</span><strong id="cost-label">1,20 €</strong></div><small>Pro Ziehung, ohne Bearbeitungsgebühr. Keine Spielabgabe in dieser App.</small></div>
+          </div>
+        </div>
+        <div class="action-line"><button type="button" class="primary-btn large" id="generate-btn">Zahlenreihe erstellen <span aria-hidden="true">↗</span></button><span id="generate-message" class="action-note" role="status">Noch keine Zahlen berechnet.</span></div>
+        <div class="section-heading output-head"><div><span class="eyebrow">02 / DEINE ERGEBNISSE</span><h2>Berechnete Zahlen</h2></div><button type="button" class="outline-btn" id="copy-tickets" disabled>Alle kopieren</button></div>
+        <div id="ticket-list" class="ticket-list"><div class="empty"><div class="empty-symbol">✳</div><strong>Bereit für dein Experiment</strong><span>Wähle deine Einstellungen und starte die Berechnung.</span></div></div>
+        <div id="reason-card" class="reason-card" hidden></div>
+        <div class="notice"><span class="notice-icon">i</span><p><strong>Wissenschaftlich transparent:</strong> Gematria bietet keinen nachgewiesenen Vorhersagevorteil bei einer fairen Lottoziehung. Übereinstimmungen können zufällig entstehen. Mit einem Tipp liegt die Chance auf mindestens drei Richtige bei rund <span id="chance-inline">1,86 %</span>.</p></div>
+      </section>
+      <section data-panel="patterns" class="panel" aria-label="Musteranalyse">
+        <div class="page-lead"><span class="eyebrow">DATENFORSCHUNG</span><h1>Spuren im <em>Zahlenarchiv.</em></h1><p>Häufigkeiten, Monatsmuster und Wochentage. Auffällige Werte sind Beobachtungen und keine Vorhersagen.</p></div>
+        <div class="metric-grid"><div class="metric-card"><span>Historische Ziehungen</span><strong id="metric-total">0</strong><small>Importierte Datensätze</small></div><div class="metric-card"><span>Früheste Ziehung</span><strong id="metric-first">–</strong><small>Im geladenen Archiv</small></div><div class="metric-card"><span>Letzte Ziehung</span><strong id="metric-last">–</strong><small>Im geladenen Archiv</small></div></div>
+        <div class="chart-grid"><div class="panel-card data-card"><div class="card-header"><div><span class="eyebrow">ALLE ZIEHUNGEN</span><h3>Häufigste Zahlen</h3></div></div><div class="bar-list" id="chart-overall"><div class="empty small">Bitte Archiv laden.</div></div></div><div class="panel-card data-card"><div class="card-header"><div><span class="eyebrow">PASSEND ZUM DATUM</span><h3 id="pattern-title">Monat und Wochentag</h3></div><select id="pattern-filter"><option value="month">Gleicher Monat</option><option value="weekday">Gleicher Wochentag</option><option value="day">Gleicher Monatstag</option><option value="digits">Gleiche Datumsquersumme</option></select></div><p id="pattern-note" class="hint">Auswahl nach deinem Ziehungsdatum.</p><div class="bar-list" id="chart-filter"><div class="empty small">Bitte Archiv laden.</div></div></div></div>
+        <div class="notice"><span class="notice-icon">i</span><p>Jede Zahl hat bei einer fairen Ziehung dieselbe Wahrscheinlichkeit, unabhängig davon, wie häufig sie bislang gezogen wurde. Große Abweichungen können allein durch Zufall entstehen.</p></div>
+      </section>
+      <section data-panel="backtest" class="panel" aria-label="Rückwärtstest">
+        <div class="page-lead"><span class="eyebrow">VERGLEICH STATT VERSPRECHEN</span><h1>Hält das Muster <em>stand?</em></h1><p>Der Algorithmus berechnet für vergangene Ziehungsdaten Tipps und vergleicht sie mit den tatsächlichen Gewinnzahlen. Er erhält dabei nur ältere Ziehungen als Eingabe.</p></div>
+        <div class="panel-card backtest-controls"><div><label for="test-size" class="field-label">Testumfang</label><select id="test-size"><option value="100">Letzte 100 Ziehungen</option><option value="250" selected>Letzte 250 Ziehungen</option><option value="500">Letzte 500 Ziehungen</option><option value="1000">Letzte 1.000 Ziehungen</option></select></div><div class="test-control-text"><span>Getestet wird das aktuell gewählte Modell, Wort und Gematria-System.</span><small>Vergleich mit einem reproduzierbaren Zufallsmodell bei gleicher Anzahl von Tippfeldern.</small></div><button type="button" class="primary-btn" id="run-test">Rückwärtstest starten</button></div>
+        <div id="test-placeholder" class="empty test-empty"><div class="empty-symbol">◷</div><strong>Ein Test mit echten Ergebnissen</strong><span>Starte den Vergleich, sobald das Ziehungsarchiv geladen wurde.</span></div>
+        <div id="test-results" hidden></div>
+      </section>
+      <section data-panel="data" class="panel" aria-label="Datenarchiv">
+        <div class="page-lead"><span class="eyebrow">DATENGRUNDLAGE</span><h1>Jede Zahl braucht <em>eine Quelle.</em></h1><p>Die Analyse nutzt ein historisches Archiv. Du kannst die Daten aktualisieren oder eigene CSV-Dateien importieren.</p></div>
+        <div class="panel-card source-card"><div class="source-icon">↧</div><div class="source-detail"><span class="eyebrow">VERBUNDENES ARCHIV</span><h3>Deutsches Lotto 6 aus 49</h3><p id="source-status">Archiv wird geladen …</p><small id="source-range">–</small></div><button type="button" class="primary-btn" id="refresh-data">Online aktualisieren</button></div>
+        <div class="source-lower"><div class="panel-card upload-card"><span class="eyebrow">EIGENE DATEN IMPORTIEREN</span><h3>CSV-Datei verwenden</h3><p>Unterstützt das Schema <code>date,n1,n2,n3,n4,n5,n6,superzahl</code> sowie entsprechende Datums- und Zahlenspalten mit Semikolon.</p><label for="csv-file" class="file-label">CSV-Datei auswählen <span>↗</span></label><input type="file" id="csv-file" accept=".csv,text/csv,text/plain" hidden><p id="csv-feedback" class="hint" role="status"></p></div>
+        <div class="panel-card upload-card"><span class="eyebrow">QUELLEN UND VERANTWORTUNG</span><h3>Woher kommen die Zahlen?</h3><p>Onlineabruf aus einem unabhängigen GitHub-Datenarchiv. Die Daten stammen laut Archivbetreiber von lottozahlenonline.de und sind nicht amtlich geprüft.</p><p><a href="https://github.com/daowa89/lottery-archive" target="_blank" rel="noopener noreferrer">Archiv und Nutzungshinweise ansehen ↗</a></p><p><a href="https://www.westlotto.de/service/downloads/downloads.html" target="_blank" rel="noopener noreferrer">WestLotto: offizielle Downloads ↗</a></p></div></div>
+        <div class="notice"><span class="notice-icon">i</span><p>Das Onlinearchiv ist ein Angebot Dritter für private, nicht kommerzielle Nutzung. Beim Aktualisieren werden Ziehungsdaten direkt vom Drittanbieter geladen und lokal im Browser zwischengespeichert. Veröffentlichungen oder kommerzielle Weiterverwendung der Daten müssen gesondert geprüft werden.</p></div>
+      </section>
+      <section data-panel="method" class="panel" aria-label="Methodik">
+        <div class="page-lead"><span class="eyebrow">UNSER ANSATZ</span><h1>Neugier braucht <em>Kontrolle.</em></h1><p>So entstehen unsere Zahlen, und so trennen wir Zufälle von überprüfbaren Hypothesen.</p></div>
+        <div class="method-stack"><article class="panel-card method-item"><span class="step-number">01</span><div><h3>Gematria</h3><p>Buchstaben erhalten einen Zahlenwert. Zur Auswahl stehen A = 1 bis Z = 26, die pythagoreische Reduktion auf 1 bis 9 und die umgekehrte Reihenfolge. Daten werden in Tag, Monat, Jahresquersumme, Kalenderwoche und weitere festgelegte Rechenregeln zerlegt. Die Ergebnisse werden durch Restbildung auf 1 bis 49 abgebildet. Diese Regeln sind experimentell, nicht historisch überlieferte Lotto-Vorhersageverfahren.</p></div></article>
+        <article class="panel-card method-item"><span class="step-number">02</span><div><h3>Historische Häufigkeit</h3><p>Für das Statistikmodell zählen wir, wie oft jede Zahl in den letzten bis zu 156 früheren Ziehungen vorkam. Höhere beobachtete Häufigkeit beeinflusst die Sortierung, beweist aber keinen zukünftigen Vorteil. Bei mehreren Reihen versucht der Generator Überschneidungen zu reduzieren.</p></div></article>
+        <article class="panel-card method-item"><span class="step-number">03</span><div><h3>Rückwärtstest ohne Blick in die Zukunft</h3><p>Für eine Ziehung vom Datum X werden nur Ziehungen vor X in die Berechnung gegeben. Danach vergleichen wir unsere Tipps mit den tatsächlich gezogenen sechs Zahlen. Das Zufallsmodell erhält dieselbe Anzahl von Tippfeldern. Eine nachträgliche Modellauswahl anhand vieler Tests führt weiterhin zu Überanpassung und ist noch kein wissenschaftlicher Wirksamkeitsnachweis.</p></div></article>
+        <article class="panel-card method-item"><span class="step-number">04</span><div><h3>Was 3 Richtige bedeuten</h3><p>Für genau einen Tipp aus sechs verschiedenen Zahlen beträgt die theoretische Wahrscheinlichkeit auf mindestens drei Richtige <strong id="math-chance">–</strong>. Bei mehreren Tipps steigt die Gesamtwahrscheinlichkeit, aber auch der Spieleinsatz. Vergangene Serien und Gematria können eine faire Ziehung nicht nachweislich vorhersagen.</p></div></article></div>
+        <div class="notice"><span class="notice-icon">i</span><p>Dieses Werkzeug dient der privaten mathematischen Exploration, nicht dem Verkauf oder der Vermittlung von Glücksspielen. Ab 18 Jahren. Ein vollständiger Verlust des Einsatzes ist möglich. Setze nur Geld ein, dessen Verlust du verkraften kannst.</p></div>
+      </section>
+    </main>
+    <footer class="footer"><span>NUMERA · Das Zahlenlabor</span><span>Mathematisches Experiment · Keine Gewinnvorhersage</span></footer>
+  </div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>
