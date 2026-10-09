@@ -1,4 +1,4 @@
-import { ARCHIVE_URL, COST_PER_TIP, EURO_ARCHIVE_URL, EURO_COST_PER_TIP, parseCSV, parseEuroCSV, parseISO, formatDate, gematria, generate, generateEuro, compareDraws, compareEuroDraws, euroWinningClass, getCalendarPatterns, nextDateForGame, theoreticalSingleTicket, partsOf, matches } from './engine.mjs';
+import { ARCHIVE_URL, COST_PER_TIP, EURO_ARCHIVE_URL, EURO_COST_PER_TIP, parseCSV, parseEuroCSV, parseISO, formatDate, gematria, generate, generateEuro, compareDraws, compareEuroDraws, euroWinningClass, getCalendarPatterns, nextDateForGame, theoreticalSingleTicket, partsOf, matches } from './engine.mjs?v=1.1.1';
 
 const $ = id => document.getElementById(id);
 const state = {game:'lotto',draws:[],drawsByGame:{lotto:[],euro:[]},sourceByGame:{lotto:'',euro:''},tickets:[],extraTickets:[],analysis:null,generatedConfig:null,selected:0,source:'',lastLoad:'',loadingGames:new Set(),saved:[],budget:10};
