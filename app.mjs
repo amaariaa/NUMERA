@@ -1,4 +1,4 @@
-import { ARCHIVE_URL, COST_PER_TIP, EURO_ARCHIVE_URL, EURO_COST_PER_TIP, parseCSV, parseEuroCSV, parseISO, formatDate, gematria, generate, generateEuro, compareDraws, compareEuroDraws, euroWinningClass, getCalendarPatterns, nextDateForGame, theoreticalSingleTicket, partsOf, matches } from './engine.mjs?v=1.1.1';
+import { ARCHIVE_URL, COST_PER_TIP, EURO_ARCHIVE_URL, EURO_COST_PER_TIP, parseCSV, parseEuroCSV, parseISO, formatDate, gematria, generate, generateEuro, compareDraws, compareEuroDraws, euroWinningClass, getCalendarPatterns, nextDateForGame, theoreticalSingleTicket, partsOf, matches } from './engine.mjs?v=1.2.0';
 
 const $ = id => document.getElementById(id);
 const state = {game:'lotto',draws:[],drawsByGame:{lotto:[],euro:[]},sourceByGame:{lotto:'',euro:''},tickets:[],extraTickets:[],analysis:null,generatedConfig:null,selected:0,source:'',lastLoad:'',loadingGames:new Set(),saved:[],budget:10};
@@ -6,9 +6,9 @@ const euro = value=>value.toLocaleString('de-DE',{style:'currency',currency:'EUR
 const integer=value=>Number(value).toLocaleString('de-DE');
 const percent=value=>Number(value).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' %';
 const dateToday = ()=> { const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
-const config = ()=>({date:$('draw-date').value,keyword:$('keyword').value.trim() || 'LOTTO',alphabet:$('alphabet').value,mode:$('mode').value,tickets:+$('ticket-count').value});
+const config = ()=>({date:$('draw-date').value,keyword:$('keyword').value.trim() || 'LOTTO',hebrewKeyword:$('hebrew-keyword').value.trim(),alphabet:$('alphabet').value,mode:$('mode').value,tickets:+$('ticket-count').value});
 const systemName = {ordinal:'A=1 … Z=26',pythagorean:'Pythagoreisch',reverse:'Z=1 … A=26'};
-const modelName = {gematria:'Gematria & Kalender',hybrid:'Gematria + Häufigkeit',statistics:'Historische Häufigkeit',random:'Zufall'};
+const modelName = {research:'Gesamtanalyse (Gematria, Numerologie, Kalender und Historie)',gematria:'Gematria & Kalender',hybrid:'Gematria + Häufigkeit',statistics:'Historische Häufigkeit',random:'Zufall'};
 let toastTimer;
 function toast(message) {
   const el=$('toast');el.textContent=message;el.classList.add('show');
@@ -129,7 +129,14 @@ function reasonBlock(number,extra=false){
   const value=document.createElement('div');value.className='reason-number';value.textContent=String(number);
   const label=document.createElement('span');label.className='reason-label';
   const small=document.createElement('small');
-  if (cfg.mode==='random') {
+  if (cfg.mode==='research') {
+    const scores=extra?state.analysis.extraScoreDetails:state.analysis.scoreDetails;
+    const data=scores[number];
+    const names={gematria:'Gematria',numerologie:'Numerologie',kalender:'Kalender',kabbala:'Hebräisch',historie:'Häufigkeit',datumsarchiv:'Datumsarchiv'};
+    const ranked=Object.entries(data.breakdown).filter(([,v])=>v!==0).sort((a,b)=>b[1]-a[1]);
+    label.textContent=`${data.total.toLocaleString('de-DE',{maximumFractionDigits:2})} Modellpunkte`;
+    small.textContent=ranked.map(([key,score])=>`${names[key]} ${score>=0?'+':''}${score.toLocaleString('de-DE',{maximumFractionDigits:2})}`).join(' · ')+'. Punkte sind KEINE Gewinnwahrscheinlichkeit.';
+  } else if (cfg.mode==='random') {
     label.textContent='Zufallsmodell';small.textContent='Per reproduzierbarer Zufallszahl ausgewählt, keine Gematria-Bedeutung.';
   } else if (cfg.mode==='statistics') {
     label.textContent='Historische Häufigkeit';small.textContent=n?`${count} Treffer in den letzten ${n} früheren Ziehungen.`:'Keine früheren Ziehungen geladen. Diese Reihe beruht nur auf einer technischen Ersatzsortierung.';
@@ -150,6 +157,7 @@ function renderReasons(){
   const title=document.createElement('h3');title.textContent=`Warum diese Zahlen? · Reihe ${state.selected+1}`;
   const cfg=state.generatedConfig||config();const info=document.createElement('p');info.className='hint';info.style.margin='0 0 19px';
   info.textContent=`${modelName[cfg.mode]} · ${systemName[cfg.alphabet]} · Wortwert „${cfg.keyword}“ = ${gematria(cfg.keyword,cfg.alphabet)} · Ziehungsdatum ${formatDate(cfg.date)}.`;
+  if(cfg.mode==='research'){const note=document.createElement('p');note.className='hint';note.textContent='Alle Zahlen nach festem Gesamtmodell bewertet, ohne Zufallsvariationen. Die Reihen 2 bis 5 berücksichtigen zusätzlich die Streuung. Die Modellpunkte sind keine Gewinnchancen. '+(state.analysis.analysisMeta.hebrew?`Hebräischer Wortwert: ${state.analysis.analysisMeta.hebrew}.`:'Für echte kabbalistische Gematria optional ein Wort in hebräischer Schrift eingeben.');box.append(note);}
   const grid=document.createElement('div');grid.className='reason-grid';state.tickets[state.selected].forEach(n=>grid.append(reasonBlock(n)));
   if(state.game==='euro'){const label=document.createElement('h4');label.textContent='Eurozahlen';label.className='extra-reason-title';grid.append(label);state.extraTickets[state.selected].forEach(n=>grid.append(reasonBlock(n,true)));}
   box.append(title,info,grid);
@@ -159,9 +167,10 @@ function handleGenerate(){
   if(!parseISO(c.date)){toast('Bitte ein gültiges Datum eingeben.');return;}
   const historical=state.draws.filter(r=>r.date<c.date);
   if((c.mode==='statistics'||c.mode==='hybrid')&&historical.length===0){toast('Keine früheren Ziehungen: Statistikmodell derzeit eingeschränkt.');}
-  state.analysis=(state.game==='euro'?generateEuro:generate)({date:c.date,keyword:c.keyword,alphabet:c.alphabet,mode:c.mode,tickets:c.tickets,pastDraws:historical});
+  state.analysis=(state.game==='euro'?generateEuro:generate)({date:c.date,keyword:c.keyword,alphabet:c.alphabet,hebrewKeyword:c.hebrewKeyword,mode:c.mode,tickets:c.tickets,pastDraws:historical});
   state.tickets=state.analysis.tickets;state.extraTickets=state.analysis.extraTickets||[];state.selected=0;state.generatedConfig={...c,game:state.game};
-  $('generate-message').textContent=`${state.tickets.length} Reihe${state.tickets.length!==1?'n':''} für ${formatDate(c.date)} erstellt.`;
+  if(c.mode==='research' && historical.length===0)toast('Ohne Archiv: historische Häufigkeiten konnten nicht einfließen.');
+  $('generate-message').textContent=c.mode==='research'?`${state.tickets.length} berechnete Reihen nach sechs festgelegten Teilmodellen erstellt (keine Gewinnprognose).`:`${state.tickets.length} Reihe${state.tickets.length!==1?'n':''} für ${formatDate(c.date)} erstellt.`;
   makeTicketCards();renderReasons();
   document.getElementById('ticket-list').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
@@ -201,7 +210,7 @@ async function runTest(){
   try {
     const c=config();const size=+$('test-size').value;
     const isEuro=state.game==='euro';
-    const test=(isEuro?compareEuroDraws:compareDraws)({draws:state.draws,model:c.mode,alphabet:c.alphabet,keyword:c.keyword,ticketCount:c.tickets,size});
+    const test=(isEuro?compareEuroDraws:compareDraws)({draws:state.draws,model:c.mode,alphabet:c.alphabet,keyword:c.keyword,hebrewKeyword:c.hebrewKeyword,ticketCount:c.tickets,size});
     const root=$('test-results');root.replaceChildren();root.hidden=false;$('test-placeholder').hidden=true;
     const heading=document.createElement('div');heading.className='section-heading';
     const label=document.createElement('div');label.innerHTML='<span class="eyebrow">ERGEBNIS</span><h2>Treffer im Vergleich</h2>';heading.append(label);
@@ -326,7 +335,7 @@ function wireEvents(){
   $('pattern-filter').addEventListener('change',drawPatterns);
   $('pattern-pool').addEventListener('change',drawPatterns);
   $('ticket-count').addEventListener('change',updateCost);
-  ['draw-date','keyword','alphabet','mode','ticket-count'].forEach(id=>$(id).addEventListener('change',()=>{markStale();if(id==='draw-date')drawPatterns();}));
+  ['draw-date','keyword','hebrew-keyword','alphabet','mode','ticket-count'].forEach(id=>$(id).addEventListener('change',()=>{markStale();if(id==='draw-date')drawPatterns();}));
   $('copy-tickets').addEventListener('click',async()=>{
     const c=config();const content=`NUMERA · ${state.game==='euro'?'Eurojackpot':'Lotto 6aus49'} · ${formatDate(c.date)} · ${modelName[c.mode]}\n`+state.tickets.map((t,i)=>`Reihe ${i+1}: ${t.join(' · ')}${state.game==='euro'?' | Euro: '+state.extraTickets[i].join(' · '):''}`).join('\n');
     try{await navigator.clipboard.writeText(content);toast('Zahlenreihen kopiert.');}

@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#11112c">
 <meta name="description" content="NUMERA untersucht Gematria und historische Lottozahlen mit überprüfbaren Rückwärtstests. Keine Gewinnversprechen.">
-<link rel="manifest" href="./manifest.webmanifest?v=1.1.1">
-<link rel="icon" href="./icon-192.png?v=1.1.1" type="image/png">
-<link rel="apple-touch-icon" href="./icon-192.png?v=1.1.1">
-<link rel="stylesheet" href="./styles.css?v=1.1.1">
+<link rel="manifest" href="./manifest.webmanifest?v=1.2.0">
+<link rel="icon" href="./icon-192.png?v=1.2.0" type="image/png">
+<link rel="apple-touch-icon" href="./icon-192.png?v=1.2.0">
+<link rel="stylesheet" href="./styles.css?v=1.2.0">
 <title>NUMERA | Das Zahlenlabor</title>
 </head>
 <body>
@@ -29,7 +29,7 @@
     </nav>
     <div class="sidebar-bottom">
       <span class="status-pulse"></span><span id="sidebar-data-count">Daten werden geladen</span>
-      <div class="sidebar-version">NUMERA · Version 1.1.1</div>
+      <div class="sidebar-version">NUMERA · Version 1.2.0</div>
     </div>
   </aside>
   <div class="work-area">
@@ -44,7 +44,7 @@
         <div class="hero">
           <div class="hero-copy"><div class="hero-tag"><span class="mini-dot"></span> EXPERIMENTELLE ZAHLENFORSCHUNG</div>
             <h1>Was sagen uns<br><em>die Zahlen?</em></h1>
-            <p>Gematria, Kalenderdaten und echte Ziehungen. Entdecke Muster, berechne Zahlen und prüfe deine Ideen mit Daten.</p>
+            <p>Gematria, Kabbala, Numerologie, Kalender und echte Ziehungen. Mehrere begründete Zahlenreihen aus einem gemeinsamen Bewertungsmodell.</p>
             <div class="hero-buttons"><button class="primary-btn" type="button" id="hero-generate">Zahlen berechnen <span aria-hidden="true">↗</span></button><button class="ghost-btn" type="button" id="hero-backtest">Zum Rückwärtstest <span aria-hidden="true">↗</span></button></div>
           </div>
           <div class="orb-panel" aria-hidden="true"><div class="orb-halo"></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orb-core"><span id="orb-game-number" class="orb-big">49</span><span id="orb-subtitle">ZAHLEN</span></div><div class="orb-pip pip-one">7</div><div class="orb-pip pip-two">23</div><div class="orb-pip pip-three">11</div><div class="orb-pip pip-four">42</div></div>
@@ -54,19 +54,19 @@
           <div class="panel-card control-card">
             <label class="field-label" for="draw-date">Ziehungsdatum</label><input type="date" id="draw-date" required>
             <label class="field-label" for="keyword">Wort für die Gematria</label><input type="text" id="keyword" maxlength="40" value="LOTTO" placeholder="Zum Beispiel LOTTO">
-            <p class="hint">Das Wort wird nach dem gewählten Zahlenalphabet umgerechnet.</p>
+            <p class="hint">Lateinische Gematria: drei Zahlenalphabete fließen in die Gesamtanalyse ein.</p><label class="field-label" for="hebrew-keyword">Hebräisches Wort (optional)</label><input id="hebrew-keyword" type="text" dir="auto" maxlength="40" placeholder="z. B. שלום"><p class="hint">Nur hebräische Schrift wird als traditionelle kabbalistische Gematria (Mispar Hechrechi) berechnet. Ohne Eingabe bleibt diese Komponente aus.</p>
           </div>
           <div class="panel-card control-card">
             <label class="field-label" for="alphabet">Gematria-System</label><select id="alphabet"><option value="ordinal">A = 1 bis Z = 26</option><option value="pythagorean">Pythagoreisch (1 bis 9)</option><option value="reverse">Umgekehrt (Z = 1)</option></select>
-            <label class="field-label" for="mode">Berechnungsmodell</label><select id="mode"><option value="gematria">Gematria &amp; Kalender</option><option value="hybrid">Gematria + historische Häufigkeit</option><option value="statistics">Nur historische Häufigkeit</option><option value="random">Zufall als Vergleich</option></select>
+            <label class="field-label" for="mode">Berechnungsmodell</label><select id="mode"><option value="research">Gesamtanalyse: alle Methoden</option><option value="gematria">Gematria &amp; Kalender</option><option value="hybrid">Gematria + historische Häufigkeit</option><option value="statistics">Nur historische Häufigkeit</option><option value="random">Zufall als Vergleich</option></select>
           </div>
           <div class="panel-card control-card">
             <label class="field-label" for="ticket-count">Anzahl Zahlenreihen</label>
-            <select id="ticket-count"><option value="1">1 Zahlenreihe</option><option value="3">3 Zahlenreihen</option><option value="5">5 Zahlenreihen</option><option value="10">10 Zahlenreihen</option></select>
+            <select id="ticket-count"><option value="1">1 Zahlenreihe</option><option value="3" selected>3 Zahlenreihen</option><option value="4">4 Zahlenreihen</option><option value="5">5 Zahlenreihen</option><option value="10">10 Zahlenreihen</option></select>
             <div class="cost-line"><div><span>Reiner Spieleinsatz</span><strong id="cost-label">1,20 €</strong></div><small>Pro Ziehung, ohne Bearbeitungsgebühr. Keine Spielabgabe in dieser App.</small></div>
           </div>
         </div>
-        <div class="action-line"><button type="button" class="primary-btn large" id="generate-btn">Zahlenreihe erstellen <span aria-hidden="true">↗</span></button><span id="generate-message" class="action-note" role="status">Noch keine Zahlen berechnet.</span></div>
+        <div class="action-line"><button type="button" class="primary-btn large" id="generate-btn">Zahlenreihen berechnen <span aria-hidden="true">↗</span></button><span id="generate-message" class="action-note" role="status">Noch keine Zahlen berechnet.</span></div>
         <div class="section-heading output-head"><div><span class="eyebrow">02 / DEINE ERGEBNISSE</span><h2>Berechnete Zahlen</h2></div><div class="result-actions"><button type="button" class="outline-btn" id="save-tickets" disabled>Tipps merken</button><button type="button" class="outline-btn" id="copy-tickets" disabled>Alle kopieren</button></div></div>
         <div id="ticket-list" class="ticket-list"><div class="empty"><div class="empty-symbol">✳</div><strong>Bereit für dein Experiment</strong><span>Wähle deine Einstellungen und starte die Berechnung.</span></div></div>
         <div id="reason-card" class="reason-card" hidden></div>
@@ -103,7 +103,7 @@
       </section>
       <section data-panel="method" class="panel" aria-label="Methodik">
         <div class="page-lead"><span class="eyebrow">UNSER ANSATZ</span><h1>Neugier braucht <em>Kontrolle.</em></h1><p>So entstehen unsere Zahlen, und so trennen wir Zufälle von überprüfbaren Hypothesen.</p></div>
-        <div class="method-stack"><article class="panel-card method-item"><span class="step-number">01</span><div><h3>Gematria</h3><p>Buchstaben erhalten einen Zahlenwert. Zur Auswahl stehen A = 1 bis Z = 26, die pythagoreische Reduktion auf 1 bis 9 und die umgekehrte Reihenfolge. Daten werden in Tag, Monat, Jahresquersumme, Kalenderwoche und weitere festgelegte Rechenregeln zerlegt. Die Ergebnisse werden durch Restbildung auf 1 bis 49 abgebildet. Diese Regeln sind experimentell, nicht historisch überlieferte Lotto-Vorhersageverfahren.</p></div></article>
+        <div class="method-stack"><article class="panel-card method-item"><span class="step-number">00</span><div><h3>Gesamtanalyse: sechs Teilmodelle</h3><p>Für jede Zahl berechnen wir feste Modellpunkte aus lateinischer Gematria, Numerologie, Kalenderregeln, optionaler hebräischer Gematria, historischen Häufigkeiten und Datumsgruppen im Archiv. Jede Komponente wird auf eine vergleichbare Skala gebracht. Die erste Reihe verwendet die höchstbewerteten Zahlen, weitere Reihen verringern Wiederholungen. Es wird in diesem Modus kein Zufall beigemischt. Die Gewichtungen sind hypothetisch und nicht durch eine höhere Gewinnquote validiert.</p><p>Modellgewichtung bei hebräischer Eingabe: lateinische Gematria 27 %, Numerologie 24 %, Kalender 16 %, hebräische Gematria 14 %, historische Häufigkeit 12 % und historische Datumsgruppen 7 %. Ohne hebräische Eingabe werden die übrigen Gewichtungen auf 100 % normiert. Die Gewichtung ist eine gewählte Forschungsannahme, keine aus Ziehungen abgeleitete Wahrscheinlichkeit.</p><p>Kabbalistische Gematria verwendet die traditionelle hebräische Buchstabenwertung. Ein lateinisches Wort wird nicht automatisch ins Hebräische übertragen, weil dabei unterschiedliche Schreibweisen möglich sind. <a href="https://www.jewishencyclopedia.com/articles/6571-gematria" target="_blank" rel="noopener noreferrer">Historische Quelle zur Gematria ↗</a></p></div></article><article class="panel-card method-item"><span class="step-number">01</span><div><h3>Gematria</h3><p>Buchstaben erhalten einen Zahlenwert. Zur Auswahl stehen A = 1 bis Z = 26, die pythagoreische Reduktion auf 1 bis 9 und die umgekehrte Reihenfolge. Daten werden in Tag, Monat, Jahresquersumme, Kalenderwoche und weitere festgelegte Rechenregeln zerlegt. Die Ergebnisse werden durch Restbildung auf 1 bis 49 abgebildet. Diese Regeln sind experimentell, nicht historisch überlieferte Lotto-Vorhersageverfahren.</p></div></article>
         <article class="panel-card method-item"><span class="step-number">02</span><div><h3>Historische Häufigkeit</h3><p>Für das Statistikmodell zählen wir, wie oft jede Zahl in den letzten bis zu 156 früheren Ziehungen vorkam. Höhere beobachtete Häufigkeit beeinflusst die Sortierung, beweist aber keinen zukünftigen Vorteil. Bei mehreren Reihen versucht der Generator Überschneidungen zu reduzieren.</p></div></article>
         <article class="panel-card method-item"><span class="step-number">03</span><div><h3>Rückwärtstest ohne Blick in die Zukunft</h3><p>Für eine Ziehung vom Datum X werden nur Ziehungen vor X in die Berechnung gegeben. Danach vergleichen wir unsere Tipps mit den tatsächlich gezogenen sechs Zahlen. Das Zufallsmodell erhält dieselbe Anzahl von Tippfeldern. Für Eurojackpot werten wir die zwölf offiziellen Gewinnklassen aus. Eine nachträgliche Modellauswahl anhand vieler Tests führt weiterhin zu Überanpassung und ist noch kein wissenschaftlicher Wirksamkeitsnachweis.</p></div></article>
         <article class="panel-card method-item"><span class="step-number">04</span><div><h3>Was 3 Richtige bedeuten</h3><p>Beim Lotto 6aus49 beträgt die theoretische Wahrscheinlichkeit auf mindestens drei Richtige mit einem Tipp <strong id="math-chance">–</strong>. Bei mehreren Tipps steigt die Chance auf einen Treffer in mindestens einem Feld, gleichzeitig steigen die Kosten. Gematria kann die Ziehung nicht nachweislich vorhersagen.</p></div></article>
@@ -115,6 +115,6 @@
   </div>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script type="module" src="./app.mjs?v=1.1.1"></script>
+<script type="module" src="./app.mjs?v=1.2.0"></script>
 </body>
 </html>

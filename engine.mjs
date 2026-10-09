@@ -126,7 +126,8 @@ function frequencies(pastDraws, last=156) {
   const deviation = Math.sqrt(Math.max(1,sample.length*6/49*(43/49)));
   return {counts,sample:sample.length, z:counts.map(c=>(c-expected)/deviation)};
 }
-export function generate({date,keyword='LOTTO',alphabet='ordinal',mode='gematria',tickets=1,pastDraws=[],seed='standard'}) {
+export function generate({date,keyword='LOTTO',alphabet='ordinal',hebrewKeyword='',mode='gematria',tickets=1,pastDraws=[],seed='standard'}) {
+  if(mode==='research')return researchGenerate({date,keyword,alphabet,hebrewKeyword,tickets,pastDraws,seed,max:49,pick:6,field:'nums'});
   if (!parseISO(date)) throw Error('Bitte ein gültiges Datum wählen.');
   const maxTickets = Math.max(1,Math.min(12,+tickets||1));
   const sig = gematriaSignals(date,keyword,alphabet);
@@ -172,14 +173,14 @@ export function generate({date,keyword='LOTTO',alphabet='ordinal',mode='gematria
 }
 
 export function matches(numbers, winningNumbers) { const result=new Set(winningNumbers); return numbers.reduce((sum,n)=>sum+Number(result.has(n)),0); }
-export function compareDraws({draws,model='gematria',keyword='LOTTO',alphabet='ordinal',ticketCount=1,size=250}) {
+export function compareDraws({draws,model='gematria',keyword='LOTTO',alphabet='ordinal',hebrewKeyword='',ticketCount=1,size=250}) {
   if (!draws || draws.length < 40) throw Error('Für einen Rückwärtstest werden mindestens 40 Ziehungen benötigt.');
   const end=draws.length;
   const start=Math.max(30,end-Math.max(40,Math.min(1000,Number(size)||250)));
   const results=[];
   for (let i=start;i<end;i++) {
     const d=draws[i]; const history=draws.slice(0,i);
-    const ours=generate({date:d.date,keyword,alphabet,mode:model,tickets:ticketCount,pastDraws:history,seed:'test-v1'}).tickets;
+    const ours=generate({date:d.date,keyword,alphabet,hebrewKeyword,mode:model,tickets:ticketCount,pastDraws:history,seed:'test-v1'}).tickets;
     const random=generate({date:d.date,keyword,alphabet,mode:'random',tickets:ticketCount,pastDraws:history,seed:'chance-v1'}).tickets;
     const maxHits=Math.max(...ours.map(t=>matches(t,d.nums)));
     const randomMax=Math.max(...random.map(t=>matches(t,d.nums)));
@@ -283,7 +284,13 @@ function poolGenerate({date,keyword,alphabet,mode,tickets,pastDraws,seed,max,pic
   }
   return {tickets:out,reasons,sig:signal,frequency:{counts:count,sample:history.length}};
 }
-export function generateEuro({date,keyword='LOTTO',alphabet='ordinal',mode='gematria',tickets=1,pastDraws=[],seed='standard'}) {
+export function generateEuro({date,keyword='LOTTO',alphabet='ordinal',hebrewKeyword='',mode='gematria',tickets=1,pastDraws=[],seed='standard'}) {
+  if(mode==='research'){
+    const options={date,keyword,alphabet,hebrewKeyword,mode,tickets,pastDraws,seed};
+    const main=researchGenerate({...options,max:50,pick:5,field:'nums'});
+    const extra=researchGenerate({...options,max:12,pick:2,field:'extras'});
+    return {tickets:main.tickets,extraTickets:extra.tickets,reasons:main.reasons,extraReasons:extra.reasons,sig:main.sig,frequency:main.frequency,extraFrequency:extra.frequency,scoreDetails:main.scoreDetails,extraScoreDetails:extra.scoreDetails,analysisMeta:main.analysisMeta};
+  }
   if(!parseISO(date))throw Error('Bitte ein gültiges Datum wählen.');
   const count=Math.max(1,Math.min(12,Number(tickets)||1));
   const options={date,keyword,alphabet,mode,tickets:count,pastDraws,seed};
@@ -306,13 +313,13 @@ export function euroWinningClass(main,extras) {
   if(main===2&&extras===1)return 12;
   return null;
 }
-export function compareEuroDraws({draws,model='gematria',keyword='LOTTO',alphabet='ordinal',ticketCount=1,size=250}) {
+export function compareEuroDraws({draws,model='gematria',keyword='LOTTO',alphabet='ordinal',hebrewKeyword='',ticketCount=1,size=250}) {
   if (!draws||draws.length<40)throw Error('Für den Eurojackpot-Rückwärtstest werden mindestens 40 Ziehungen benötigt.');
   const start=Math.max(30,draws.length-Math.max(40,Math.min(1000,Number(size)||250))),results=[];
   for(let i=start;i<draws.length;i++){
     const d=draws[i],history=draws.slice(0,i);
     const evalModel=(mode,seed)=>{
-      const generated=generateEuro({date:d.date,keyword,alphabet,mode,tickets:ticketCount,pastDraws:history,seed});
+      const generated=generateEuro({date:d.date,keyword,alphabet,hebrewKeyword,mode,tickets:ticketCount,pastDraws:history,seed});
       const hits=generated.tickets.map((t,j)=>({main:matches(t,d.nums),extra:matches(generated.extraTickets[j],d.extras)}));
       return {win:hits.some(h=>euroWinningClass(h.main,h.extra)!==null),main:Math.max(...hits.map(h=>h.main)),topClass:Math.min(...hits.map(h=>euroWinningClass(h.main,h.extra)||99))};
     };
@@ -331,4 +338,136 @@ export function nextDateForGame(game='lotto',today=new Date()){
   const weekdays=game==='euro'?[2,5]:[3,6];
   while(!weekdays.includes(current.getDay()))current.setDate(current.getDate()+1);
   return `${current.getFullYear()}-${String(current.getMonth()+1).padStart(2,'0')}-${String(current.getDate()).padStart(2,'0')}`;
+}
+
+
+// Forschungsmodus: deterministisches, offengelegtes Bewertungsmodell.
+// Die Scores sind HEURISTISCH und keine geschätzten Gewinnwahrscheinlichkeiten.
+const STANDARD_HEBREW_VALUES = Object.freeze({
+  'א':1,'ב':2,'ג':3,'ד':4,'ה':5,'ו':6,'ז':7,'ח':8,'ט':9,
+  'י':10,'כ':20,'ך':20,'ל':30,'מ':40,'ם':40,'נ':50,'ן':50,
+  'ס':60,'ע':70,'פ':80,'ף':80,'צ':90,'ץ':90,
+  'ק':100,'ר':200,'ש':300,'ת':400
+});
+export function hebrewGematria(value='') {
+  const letters=String(value).match(/[א-ת]/g)||[];
+  return letters.reduce((sum,ch)=>sum+(STANDARD_HEBREW_VALUES[ch]||0),0);
+}
+export function digitalRoot(value){const n=Math.abs(Math.trunc(Number(value)||0));return n?1+(n-1)%9:0;}
+function toPool(value,max){return ((Math.trunc(value)-1)%max+max)%max+1;}
+function researchGenerate({date,keyword='LOTTO',alphabet='ordinal',hebrewKeyword='',tickets=1,pastDraws=[],max=49,pick=6,field='nums'}) {
+  if(!parseISO(date))throw Error('Bitte ein gültiges Datum wählen.');
+  const limit=Math.max(1,Math.min(12,Number(tickets)||1));
+  const {y,m,d,week,dayOfWeek}=partsOf(date);
+  const dateSum=digitSum(date.replace(/-/g,'')),yrSum=digitSum(y);
+  const hebrewRaw=hebrewGematria(hebrewKeyword);
+  const groups=['gematria','numerologie','kalender','kabbala','historie','datumsarchiv'];
+  const points=Object.fromEntries(groups.map(g=>[g,Array(max+1).fill(0)]));
+  const reasons=Array.from({length:max+1},()=>[]);
+  const add=(group,raw,label,weight)=>{
+    if(!Number.isFinite(raw)||!Number.isFinite(weight))return;
+    const number=toPool(raw,max);
+    points[group][number]+=weight;
+    reasons[number].push({label,raw,weight,number});
+  };
+  // Drei verbreitete lateinische Zahlenalphabete, das ausgewählte zählt stärker.
+  for(const system of ['ordinal','pythagorean','reverse']){
+    const value=gematria(keyword,system);
+    const a=system===alphabet?1.0:0.58;
+    const name={ordinal:'A–Z',pythagorean:'Pythagoreisch',reverse:'Z–A'}[system];
+    add('gematria',value,`Wortwert ${name}`,1.0*a);
+    add('gematria',value+d,`Wortwert ${name} + Tag`,.75*a);
+    add('gematria',value+dateSum,`Wortwert ${name} + Datumsquersumme`,.65*a);
+    add('gematria',value+m,`Wortwert ${name} + Monat`,.52*a);
+    add('gematria',value+week,`Wortwert ${name} + Kalenderwoche`,.43*a);
+  }
+  // Explizit deklarierte Numerologie-Konventionen, keine behauptete Kausalwirkung.
+  const rDate=digitalRoot(dateSum),rDay=digitalRoot(d),rMonth=digitalRoot(m),rYear=digitalRoot(y),rWord=digitalRoot(gematria(keyword,alphabet));
+  const numerologyRoots=[['Datum',rDate,1.0],['Tag',rDay,.66],['Jahr',rYear,.4],['Wort',rWord,.5]];
+  for(let n=1;n<=max;n++)for(const [label,root,weight] of numerologyRoots){
+    if(root && digitalRoot(n)===root){points.numerologie[n]+=weight;reasons[n].push({label:`Numerologie: Grundzahl ${label}`,raw:root,number:n,weight});}
+  }
+  add('numerologie',dateSum,'Numerologie: Datumsquersumme',1.0);
+  add('numerologie',rDate*2,'Numerologie: Grundzahl × 2',.55);
+  add('numerologie',rDate+rDay,'Numerologie: Grundzahl + Tageszahl',.7);
+  add('numerologie',rWord+rDate,'Numerologie: Wort- und Datumsgrundzahl',.6);
+  add('numerologie',rDate+rMonth+rYear,'Numerologie: kombinierte Grundzahlen',.65);
+  // Rechenregeln mit Datum und Kalenderwoche.
+  for(const [label,value,weight] of [
+    ['Kalendertag',d,.9],['Monat',m,.45],['Tag + Monat',d+m,.8],
+    ['Tag × Monat',d*m,.6],['Kalenderwoche',week,.7],
+    ['Jahresquersumme',yrSum,.5],['Tag + Jahresquersumme',d+yrSum,.65],
+    ['Datumsquersumme × 2',dateSum*2,.55],['Kalenderwoche + Monat',week+m,.6],
+    ['Letzte zwei Jahresziffern',y%100,.5],['Wochentagszahl + Datum',dayOfWeek+d,.55]
+  ])add('kalender',value,`Kalender: ${label}`,weight);
+  // Traditionelles hebräisches Mispar Hechrechi, nur wenn hebräischer Text vorliegt.
+  if(hebrewRaw){
+    const smallValue=String(hebrewKeyword).match(/[א-ת]/g).reduce((sum,ch)=>sum+digitalRoot(STANDARD_HEBREW_VALUES[ch]),0);
+    for(const [label,value,weight] of [
+      ['Hebräischer Wortwert',hebrewRaw,1.2],
+      ['Hebräischer Wortwert + Tag',hebrewRaw+d,.9],
+      ['Hebräischer Wortwert + Datumsquersumme',hebrewRaw+dateSum,.85],
+      ['Hebräischer Wortwert + Monat',hebrewRaw+m,.65],
+      ['Hebräischer Kleinwert',smallValue,.65],
+      ['Hebräischer Kleinwert + Datum',smallValue+dateSum,.55]
+    ])add('kabbala',value,`Hebräische Gematria: ${label}`,weight);
+  }
+  const all=pastDraws.filter(r=>r.date<date);
+  const recent=all.slice(-156);
+  const count=Array(max+1).fill(0);
+  for(const dr of recent)for(const n of dr[field]||[])count[n]++;
+  const historyTerm=(rows,factor,into)=>{
+    if(rows.length<18)return;
+    const observed=Array(max+1).fill(0);
+    for(const dr of rows)for(const n of dr[field]||[])observed[n]++;
+    const probability=pick/max,expected=rows.length*probability;
+    const deviation=Math.sqrt(Math.max(1,rows.length*probability*(1-probability)));
+    const reliability=Math.sqrt(rows.length/(rows.length+80));
+    for(let n=1;n<=max;n++){
+      const z=Math.max(-2,Math.min(2,(observed[n]-expected)/deviation));
+      points[into][n]+=factor*z*reliability;
+    }
+  };
+  historyTerm(recent,1,'historie');
+  const historicalWindow=all.slice(-1200);
+  const matchingMonth=historicalWindow.filter(x=>partsOf(x.date).m===m);
+  const matchingWeekday=historicalWindow.filter(x=>partsOf(x.date).dayOfWeek===dayOfWeek);
+  const matchingDigitSum=historicalWindow.filter(x=>digitSum(x.date.replace(/-/g,''))===dateSum);
+  historyTerm(matchingMonth,.55,'datumsarchiv');
+  historyTerm(matchingWeekday,.5,'datumsarchiv');
+  historyTerm(matchingDigitSum,.35,'datumsarchiv');
+  // Komponenten werden auf vergleichbare Skalen normiert und fest gewichtet.
+  const weighting={gematria:.27,numerologie:.24,kalender:.16,kabbala:hebrewRaw?.14:0,historie:.12,datumsarchiv:.07};
+  const weightTotal=Object.values(weighting).reduce((a,b)=>a+b,0);
+  const normalized={};
+  for(const key of groups){const maxAbs=Math.max(1,...points[key].slice(1).map(Math.abs));normalized[key]=points[key].map(x=>x/maxAbs);}
+  const scoreDetails=Array.from({length:max+1},(_,n)=>{
+    const breakdown=Object.fromEntries(groups.map(key=>[key,Math.round((normalized[key][n]||0)*weighting[key]/weightTotal*1000)/100]));
+    return {total:Number(Object.values(breakdown).reduce((a,b)=>a+b,0).toFixed(2)),breakdown};
+  });
+  // Alle Reihen durch dasselbe, vollständig deterministische Scoring auswählen.
+  // Nutzung und Paarwiederholung werden beim zweiten bis fünften Feld reduziert.
+  const usage=Array(max+1).fill(0),pairCount=new Map(),output=[];
+  for(let row=0;row<limit;row++){
+    const selected=[];
+    for(let k=0;k<pick;k++){
+      let best=null;
+      for(let n=1;n<=max;n++){
+        if(selected.includes(n))continue;
+        const reusePenalty=row===0?0:usage[n]*5.5;
+        const pairPenalty=selected.reduce((sum,other)=>sum+(pairCount.get(`${Math.min(n,other)}:${Math.max(n,other)}`)||0)*2.4,0);
+        const test=scoreDetails[n].total-reusePenalty-pairPenalty;
+        if(best===null||test>best.score+1e-9||(Math.abs(test-best.score)<1e-9&&n<best.n))best={n,score:test};
+      }
+      selected.push(best.n);
+    }
+    selected.sort((a,b)=>a-b);
+    output.push(selected);
+    for(const n of selected)usage[n]++;
+    for(let a=0;a<selected.length;a++)for(let b=a+1;b<selected.length;b++){
+      const key=`${selected[a]}:${selected[b]}`;pairCount.set(key,(pairCount.get(key)||0)+1);
+    }
+  }
+  return {tickets:output,reasons,frequency:{counts:count,sample:recent.length},scoreDetails,
+    analysisMeta:{hebrew:hebrewRaw,history:recent.length,calendarHistory:historicalWindow.length,algorithm:'Sechs feste Heuristik-Komponenten, ohne Zufallsvariationen'},sig:gematriaSignals(date,keyword,alphabet)};
 }

@@ -1,12 +1,12 @@
-const CACHE_NAME = 'numera-shell-v1.1.1';
+const CACHE_NAME = 'numera-shell-v1.2.0';
 const ASSETS = [
   './', './index.html',
-  './styles.css?v=1.1.1',
-  './app.mjs?v=1.1.1',
-  './engine.mjs?v=1.1.1',
-  './manifest.webmanifest?v=1.1.1',
-  './icon-192.png?v=1.1.1',
-  './icon-512.png?v=1.1.1'
+  './styles.css?v=1.2.0',
+  './app.mjs?v=1.2.0',
+  './engine.mjs?v=1.2.0',
+  './manifest.webmanifest?v=1.2.0',
+  './icon-192.png?v=1.2.0',
+  './icon-512.png?v=1.2.0'
 ];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME)
